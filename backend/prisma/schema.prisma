@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../../node_modules/.prisma/client"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String    @default("")
+  status      TaskStatus @default(pending)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+enum TaskStatus {
+  pending
+  completed
+}

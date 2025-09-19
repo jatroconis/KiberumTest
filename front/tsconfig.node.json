@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "vite.config.ts"
+  ]
+}

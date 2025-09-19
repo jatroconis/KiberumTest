@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: todo_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todo
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d todo"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: todo_api
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    command: >
+      sh -c "
+        pnpm prisma:generate &&
+        pnpm prisma:deploy &&
+        pnpm seed &&
+        pnpm dev
+      "
+
+  web:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      target: dev
+    container_name: todo_web
+    depends_on:
+      - api
+    env_file:
+      - .env.web    
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./front:/usr/src/app
+      - /usr/src/app/node_modules
+    command: ["pnpm","dev","--host","0.0.0.0"]
+
+
+volumes:
+  db_data:
